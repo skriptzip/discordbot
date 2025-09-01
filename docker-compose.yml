@@ -12,6 +12,11 @@ services:
     environment:
       # Set your Discord token here or use a .env file
       - DISCORD_TOKEN=${DISCORD_TOKEN}
+      # Logging configuration: 'development', 'production', or 'minimal'
+      - LOG_ENVIRONMENT=${LOG_ENVIRONMENT:-production}
+      # Enable colored terminal output (useful for development)
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
     # Uncomment the following lines if you need to expose ports
     # ports:
     #   - "8080:8080"

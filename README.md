@@ -1,78 +1,143 @@
-# Discord Bot
+# 🤖 Discord Bot - Modern Python Framework
 
-A performant Discord bot using Python and discord.py, ready for Docker deployment.
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![Python](https://img.shields.io/badge/Python-3.11-green.svg)](https://python.org)
+[![discord.py](https://img.shields.io/badge/discord.py-2.6.3-7289da.svg)](https://discordpy.readthedocs.io/)
 
-## Features
-- Basic bot setup with modular structure
-- Loads token from environment
-- Responds to simple commands
-- Dockerized for easy deployment
-- Volume mapping for live code editing
+A production-ready Discord bot with slash commands, colored logging, and Docker development workflow.
 
-## Project Structure
+## ✨ Features
+
+- 🚀 **Modern Slash Commands** - Discord's latest command system
+- 🎨 **Colored Logging** - Beautiful console output with file rotation
+- 🐳 **Docker Development** - Edit locally, run in container
+- 📊 **Environment Configs** - Development/production/minimal modes
+- 🔧 **Auto Setup** - Smart initialization and file copying
+
+## 🚀 Quick Start
+
+### Prerequisites
+- [Docker](https://docker.com) & Docker Compose
+- Discord Bot Token ([Create here](https://discord.com/developers/applications))
+
+### Setup
+```bash
+git clone https://github.com/skriptzip/discordbot.git
+cd discordbot
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your DISCORD_TOKEN
+
+# Start bot
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+## 📁 Structure
+
 ```
 discordbot/
-├── bot/                    # Bot source code (volume mapped)
+├── bot/                    # Bot code (volume mapped)
 │   ├── bot.py             # Main bot file
-│   └── requirements.txt   # Python dependencies
-├── data/                  # Persistent data storage (volume mapped)
-├── docker-compose.yml     # Docker Compose configuration
-├── Dockerfile            # Docker build configuration
-├── .env.example          # Environment variables template
-└── README.md
+│   ├── example_commands.py # Example slash commands
+│   ├── bot_logging/       # Colored logging system
+│   └── requirements.txt   # Dependencies
+├── data/                  # Persistent data (volume mapped)
+│   └── logs/             # Log files
+├── docker-compose.yml     # Development environment
+└── Dockerfile            # Container build
 ```
 
-## Getting Started
+## 🎯 Available Commands
 
-1. Clone the repository.
-2. Add your bot token to a `.env` file:
-   ```env
-   DISCORD_TOKEN=your_token_here
-   ```
-3. Build and run with Docker:
-   ```bash
-   docker build -t discordbot .
-   docker run --env-file .env -v ./bot:/app/bot discordbot
-   ```
+| Command | Description |
+|---------|-------------|
+| `/ping` | Check bot latency |
+| `/status` | Show bot statistics |
+| `/hello` | Friendly greeting |
+| `/serverinfo` | Server information |
+| `/userinfo [user]` | User information |
+| `/logtest` | Demonstrate colored logging (admin only) |
 
-## Development
+## 🔧 Development
 
-### How the Volume Mapping Works
-
-This setup uses a smart volume mapping system:
-
-1. **Default Files**: The container includes default bot files in `/app/bot-default/`
-2. **Volume Mount**: Your local `bot/` folder is mounted to `/app/bot-volume/` in the container
-3. **Auto-Copy**: On startup, the container automatically copies default files to the volume if they don't exist locally
-4. **Live Editing**: You can edit files in your local `bot/` folder and they persist between container restarts
-
-### First Run
-When you first run `docker-compose up`, the container will:
-- Create the `bot/` folder locally if it doesn't exist
-- Copy `bot.py`, `requirements.txt`, and `example_commands.py` to your local `bot/` folder
-- Start the bot using the files from your local folder
-
-### Development Workflow
-1. **Edit Files**: Modify files in the `bot/` folder using your favorite editor
-2. **Add New Files**: Create new `.py` files for commands, cogs, or utilities
-3. **Update Dependencies**: Edit `requirements.txt` to add new packages
-4. **Restart**: Run `docker-compose restart` to apply changes
-5. **Rebuild**: Run `docker-compose up --build` if you added new dependencies
-
-### Adding New Commands
-1. Create new `.py` files in the `bot/` folder
-2. Import and load them in `bot.py`
-3. Restart the container: `docker-compose restart`
-
-Example: Uncomment the code in `example_commands.py` and add this to `bot.py`:
+### Adding Commands
+Edit `bot/bot.py` or create new files:
 ```python
-await bot.load_extension('example_commands')
+@app_commands.command(name="hello", description="Say hello")
+async def hello_slash(interaction: discord.Interaction):
+    await interaction.response.send_message("Hello!")
+
+bot.tree.add_command(hello_slash)
 ```
 
-## Requirements
-See `bot/requirements.txt` for Python dependencies.
+### Environment Variables
+```bash
+DISCORD_TOKEN=your_token_here
+LOG_ENVIRONMENT=production  # development/production/minimal
+FORCE_COLOR=1              # Enable colored logs
+```
 
-## Extra Features
-- Uses `python-dotenv` for environment variable management
-- Responds to `!ping` with `Pong!`
-- Logs bot startup
+### Managing Dependencies
+1. Edit `bot/requirements.txt`
+2. Rebuild: `docker-compose up --build -d`
+
+## ℹ️ Logging
+
+The bot features a comprehensive colored logging system:
+
+- 🔍 **DEBUG** (cyan) - Detailed debugging info
+- ℹ️ **INFO** (green) - General information
+- ⚠️ **WARNING** (yellow) - Important notices
+- ❌ **ERROR** (red) - Error conditions
+- 🚨 **CRITICAL** (bright red) - Critical failures
+
+### Viewing Logs
+```bash
+# Container logs (colored)
+docker-compose logs -f
+
+# File logs
+tail -f ./data/logs/bot.log
+tail -f ./data/logs/discord.log
+```
+
+## 🛠️ Troubleshooting
+
+### Container Issues
+```bash
+# Rebuild and restart
+docker-compose down && docker-compose up --build -d
+
+# Check status
+docker-compose ps
+```
+
+### Command Registration
+```bash
+# Commands not showing? Check logs for sync issues
+docker-compose logs discordbot | grep -i sync
+```
+
+### Permissions
+```bash
+# Fix file permissions (Linux/Mac)
+sudo chown -R $(whoami):$(whoami) ./bot ./data
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**[⬆ Back to Top](#-discord-bot---modern-python-bot-framework)**
+
+Made with ❤️ by <a href="https://github.com/skriptzip">skript.zip</a>
+
+</div>
