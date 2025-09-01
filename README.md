@@ -40,15 +40,15 @@ docker-compose logs -f
 
 ```
 discordbot/
-├── bot/                    # Bot code (volume mapped)
-│   ├── bot.py             # Main bot file
-│   ├── example_commands.py # Example slash commands
-│   ├── bot_logging/       # Colored logging system
-│   └── requirements.txt   # Dependencies
-├── data/                  # Persistent data (volume mapped)
-│   └── logs/             # Log files
-├── docker-compose.yml     # Development environment
-└── Dockerfile            # Container build
+├── bot/                        # Bot code (volume mapped)
+│   ├── bot.py                  # Main bot file
+│   ├── example_commands.py     # Example slash commands
+│   ├── bot_logging/            # Colored logging system
+│   └── requirements.txt        # Dependencies
+├── data/                       # Persistent data (volume mapped)
+│   └── logs/                   # Log files
+├── docker-compose.yml          # Development environment
+└── Dockerfile                  # Container build
 ```
 
 ## 🎯 Available Commands

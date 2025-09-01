@@ -10,29 +10,30 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from bot_logging.utils import get_bot_logger, log_slash_command_usage, log_event
-
-# Get a logger for this module
-logger = get_bot_logger(__name__)
 
 class ExampleSlashCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        logger.info("ExampleSlashCommands cog initialized")
+        # Get logger from the bot instance to avoid re-initialization
+        self.logger = bot.logger.getChild('example_commands')
+        self.logger.info("ExampleSlashCommands cog initialized")
 
     @app_commands.command(name='hello', description='Say hello to a user')
-    @log_slash_command_usage  # Automatically logs command usage
     async def hello_slash(self, interaction: discord.Interaction):
         '''Say hello to a user'''
+        logger = self.bot.logger.getChild('commands')
         logger.debug(f"Processing hello command for user: {interaction.user}")
+        logger.info(f'Hello slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
         logger.info(f"Greeting user {interaction.user.display_name}")
         await interaction.response.send_message(f'Hello, {interaction.user.mention}! 👋')
         logger.debug("Hello command completed successfully")
 
     @app_commands.command(name='serverinfo', description='Display server information')
-    @log_slash_command_usage
     async def serverinfo_slash(self, interaction: discord.Interaction):
         '''Display server information'''
+        logger = self.bot.logger.getChild('commands')
+        logger.info(f'ServerInfo slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
+        
         if not interaction.guild:
             await interaction.response.send_message("This command can only be used in a server!", ephemeral=True)
             return
@@ -58,9 +59,11 @@ class ExampleSlashCommands(commands.Cog):
 
     @app_commands.command(name='userinfo', description='Display information about a user')
     @app_commands.describe(user='The user to get information about (optional, defaults to you)')
-    @log_slash_command_usage
     async def userinfo_slash(self, interaction: discord.Interaction, user: discord.Member = None):
         '''Display user information'''
+        logger = self.bot.logger.getChild('commands')
+        logger.info(f'UserInfo slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
+        
         target_user = user or interaction.user
         
         embed = discord.Embed(
@@ -84,9 +87,11 @@ class ExampleSlashCommands(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name='logtest', description='Demonstrate different log levels (admin only)')
-    @log_slash_command_usage
     async def log_test_slash(self, interaction: discord.Interaction):
         '''Demonstrate different log levels with colored output'''
+        logger = self.bot.logger.getChild('commands')
+        logger.info(f'LogTest slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
+        
         # Check if user has admin permissions
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
@@ -114,9 +119,11 @@ class ExampleSlashCommands(commands.Cog):
 
     @app_commands.command(name='logs', description='Show recent bot logs (owner only)')
     @app_commands.describe(lines='Number of log lines to show (default: 10)')
-    @log_slash_command_usage
     async def logs_slash(self, interaction: discord.Interaction, lines: int = 10):
         '''Show recent bot logs (owner only)'''
+        logger = self.bot.logger.getChild('commands')
+        logger.info(f'Logs slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
+        
         # Check if user is the bot owner
         app_info = await self.bot.application_info()
         if interaction.user.id != app_info.owner.id:
@@ -147,9 +154,9 @@ class ExampleSlashCommands(commands.Cog):
             await interaction.response.send_message("❌ Error reading log file.", ephemeral=True)
 
     @commands.Cog.listener()
-    @log_event("member_join")
     async def on_member_join(self, member):
         '''Log when a member joins'''
+        logger = self.bot.logger.getChild('events')
         logger.info(f"New member joined: {member} (ID: {member.id}) in {member.guild.name}")
         
         # Optional: Send a welcome message
@@ -167,6 +174,7 @@ class ExampleSlashCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_app_command_error(self, interaction: discord.Interaction, error: Exception):
         '''Handle slash command errors in this cog'''
+        logger = self.bot.logger.getChild('commands')
         command_name = interaction.command.name if interaction.command else "unknown"
         
         if isinstance(error, app_commands.CommandOnCooldown):
@@ -181,5 +189,7 @@ class ExampleSlashCommands(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(ExampleSlashCommands(bot))
+    # Use the bot's logger instead of creating a new one
+    logger = bot.logger.getChild('cogs')
     logger.info("ExampleSlashCommands cog loaded successfully")
 """
