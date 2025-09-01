@@ -22,12 +22,16 @@ COPY bot/requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip \
 	&& pip install --no-cache-dir -r requirements.txt
 
-# Copy bot source code
-COPY bot/ ./bot/
+# Copy bot source code to a default location (not the final location)
+COPY bot/ ./bot-default/
+
+# Copy the entrypoint script
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
 
 # Use a non-root user for security
-RUN useradd -m botuser
+RUN useradd -m botuser && chown -R botuser:botuser /app
 USER botuser
 
-# Start the bot
-CMD ["python", "bot/bot.py"]
+# Use the entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]

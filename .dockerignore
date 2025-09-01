@@ -1,0 +1,10 @@
+# Docker ignore file
+.env
+.git
+.gitignore
+README.md
+docker-compose.yml
+setup-check.sh
+.vscode
+*.md
+data/

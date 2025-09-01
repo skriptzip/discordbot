@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  discordbot:
+    build: .
+    container_name: discordbot
+    restart: unless-stopped
+    volumes:
+      # Map the bot folder so users can edit files and add new modules
+      # Files will be copied from container if they don't exist locally
+      - ./bot:/app/bot-volume
+      # Optional: Map a folder for persistent data/config
+      - ./data:/app/data
+    environment:
+      # Set your Discord token here or use a .env file
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    # Uncomment the following lines if you need to expose ports
+    # ports:
+    #   - "8080:8080"
