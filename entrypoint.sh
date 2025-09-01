@@ -35,5 +35,8 @@ if [ -f "/app/bot-volume/requirements.txt" ]; then
 fi
 
 echo "Starting bot..."
+echo "Bot files in volume:"
+ls -la /app/bot-volume/
+echo "Running: python /app/bot-volume/bot.py"
 # Run the bot from the volume
-exec python /app/bot-volume/bot.py
+exec python -u /app/bot-volume/bot.py

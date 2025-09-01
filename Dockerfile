@@ -1,6 +1,10 @@
 FROM python:3.11-slim AS base
 WORKDIR /app
 
+# Prevent Python from buffering stdout and stderr
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=UTF-8
+
 LABEL org.opencontainers.image.title="discordbot" \
 	org.opencontainers.image.description="A Discord bot application using Python." \
 	org.opencontainers.image.url="https://github.com/skriptzip/discordbot" \
