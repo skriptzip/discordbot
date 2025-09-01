@@ -18,16 +18,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements.txt ./
+COPY bot/requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip \
 	&& pip install --no-cache-dir -r requirements.txt
 
 # Copy bot source code
-COPY . .
+COPY bot/ ./bot/
 
 # Use a non-root user for security
 RUN useradd -m botuser
 USER botuser
 
 # Start the bot
-CMD ["python", "bot.py"]
+CMD ["python", "bot/bot.py"]
