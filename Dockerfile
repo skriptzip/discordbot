@@ -1,6 +1,17 @@
 FROM python:3.11-slim AS base
 WORKDIR /app
 
+LABEL org.opencontainers.image.title="discordbot" \
+	org.opencontainers.image.description="A Discord bot application using Python." \
+	org.opencontainers.image.url="https://github.com/skriptzip/discordbot" \
+	org.opencontainers.image.source="https://github.com/skriptzip/discordbot" \
+	org.opencontainers.image.authors="skript.zip <info@skript.zip>" \
+	org.opencontainers.image.licenses="MIT" \
+	org.opencontainers.image.vendor="skript.zip" \
+	org.opencontainers.image.documentation="https://github.com/skript.zip/discordbot#readme" \
+	org.opencontainers.image.ref.name="latest" \
+	org.opencontainers.image.revision="commit-sha"
+
 # Install system dependencies for performance and security
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	build-essential \
