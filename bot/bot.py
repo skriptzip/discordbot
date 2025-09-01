@@ -45,18 +45,20 @@ def main():
     bot.tree.add_command(info_slash)
     
     # Load example commands cog if it exists
-    async def load_cogs():
-        try:
-            await bot.load_extension('example_commands')
-            logger.info('Loaded example_commands cog')
-        except ImportError:
-            logger.debug('example_commands module not found, skipping')
-        except Exception as e:
-            logger.warning(f'Failed to load example_commands cog: {e}')
-    
-    # Store the cog loading function for later use
-    bot._load_cogs = load_cogs
-    
+    async def setup_hook(self):
+        """This is called when the bot starts up."""
+        self.logger.info('Bot setup hook called - registering slash commands')
+
+        # Load cogs if the function exists
+        if hasattr(self, '_load_cogs'):
+            # Load example commands cog if it exists
+            try:
+                await self.load_extension('example_commands')
+                self.logger.info('Loaded example_commands cog')
+            except ImportError:
+                self.logger.debug('example_commands module not found, skipping')
+            except Exception as e:
+                self.logger.warning(f'Failed to load example_commands cog: {e}')    
     try:
         # Run the bot (suppress discord.py's default logging since we have our own)
         logger.info('Starting Discord bot connection...')
@@ -168,7 +170,7 @@ def get_bot():
 @discord.app_commands.command(name="ping", description="Check bot latency and responsiveness")
 async def ping_slash(interaction: discord.Interaction):
     """Check bot latency and responsiveness."""
-    logger = setup_logging().getChild('commands')
+    logger = interaction.client.logger.getChild('commands')
     logger.info(f'Ping slash command invoked by {interaction.user} in {interaction.guild.name if interaction.guild else "DM"}')
     
     latency = round(interaction.client.latency * 1000)
@@ -186,7 +188,7 @@ async def ping_slash(interaction: discord.Interaction):
 @discord.app_commands.command(name="status", description="Show bot status and statistics")
 async def status_slash(interaction: discord.Interaction):
     """Show bot status and statistics."""
-    logger = setup_logging().getChild('commands')
+    logger = interaction.client.logger.getChild('commands')
     logger.info(f'Status slash command invoked by {interaction.user}')
     
     bot = interaction.client
@@ -206,7 +208,7 @@ async def status_slash(interaction: discord.Interaction):
 @discord.app_commands.command(name="info", description="Display bot information and help")
 async def info_slash(interaction: discord.Interaction):
     """Display bot information and help."""
-    logger = setup_logging().getChild('commands')
+    logger = interaction.client.logger.getChild('commands')
     logger.info(f'Info slash command invoked by {interaction.user}')
     
     embed = discord.Embed(

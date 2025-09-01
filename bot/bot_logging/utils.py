@@ -23,11 +23,16 @@ def get_bot_logger(name: str = None) -> logging.Logger:
     if name is None:
         # Get the caller's module name
         import inspect
-        frame = inspect.currentframe().f_back
-        name = frame.f_globals.get('__name__', 'bot')
+        frame = inspect.currentframe()
+        try:
+            caller = frame.f_back if frame else None
+            name = (caller.f_globals.get('__name__', 'bot') if caller else 'bot')
+        finally:
+            # Avoid reference cycles retained by frames
+            del frame
     
-    # Ensure the logger name starts with 'bot.'
-    if not name.startswith('bot.'):
+    # Ensure the logger name starts with 'bot.' but don't duplicate 'bot'
+    if not (name == 'bot' or name.startswith('bot.')):
         name = f'bot.{name}'
         
     return logging.getLogger(name)

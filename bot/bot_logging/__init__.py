@@ -13,6 +13,9 @@ from typing import Optional
 from .config import LOGGING_CONFIG, get_environment_config
 from .colored import create_colored_formatter
 
+# Global flag to track if logging has been initialized
+_logging_initialized = False
+
 
 def setup_logging(environment: str = "production") -> logging.Logger:
     """
@@ -24,6 +27,12 @@ def setup_logging(environment: str = "production") -> logging.Logger:
     Returns:
         Configured bot logger instance
     """
+    global _logging_initialized
+    
+    # Return existing logger if already initialized
+    if _logging_initialized:
+        return logging.getLogger('bot')
+        
     # Create logs directory if it doesn't exist
     os.makedirs('/app/data/logs', exist_ok=True)
     
@@ -35,6 +44,7 @@ def setup_logging(environment: str = "production") -> logging.Logger:
         logger = logging.getLogger(logger_name)
         logger.setLevel(level)
         logger.handlers.clear()  # Clear existing handlers
+        logger.propagate = False  # Prevent duplicate emission via root
     
     # Apply environment-specific overrides
     logging.getLogger('discord.http').setLevel(env_config.get('discord_http_level', logging.INFO))
@@ -77,7 +87,13 @@ def setup_logging(environment: str = "production") -> logging.Logger:
         # Add console handler to main loggers
         for logger_name in ["discord", "bot"]:
             logger = logging.getLogger(logger_name)
-            logger.addHandler(console_handler)
+            logger.propagate = False
+            # Avoid attaching duplicate stdout handlers
+            if not any(
+                isinstance(h, logging.StreamHandler) and getattr(h, "stream", None) is sys.stdout
+                for h in logger.handlers
+            ):
+                logger.addHandler(console_handler)
     
     # Log the logging setup
     bot_logger = logging.getLogger('bot')
@@ -86,6 +102,9 @@ def setup_logging(environment: str = "production") -> logging.Logger:
     bot_logger.info(f'🖥️  Console level: {logging.getLevelName(env_config.get("console_level", logging.INFO))}')
     bot_logger.info(f'📁 File level: {logging.getLevelName(env_config.get("file_level", logging.INFO))}')
     bot_logger.info(f'🌈 Colored logs: {"enabled" if env_config.get("colored_logs", True) else "disabled"}')
+    
+    # Mark logging as initialized
+    _logging_initialized = True
     
     return bot_logger
 
@@ -102,10 +121,9 @@ def get_logger(name: Optional[str] = None) -> logging.Logger:
     """
     if name is None:
         name = 'bot'
-    elif not name.startswith('bot.'):
-        name = f'bot.{name}'
-    
-    return logging.getLogger(name)
+    elif name != 'bot' and not name.startswith('bot.'):
+        name = f'bot.{name}'    
+        return logging.getLogger(name)
 
 
 def log_startup_info(logger: logging.Logger, bot_info: dict):

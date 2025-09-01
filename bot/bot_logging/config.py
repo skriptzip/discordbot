@@ -38,13 +38,15 @@ LOGGING_CONFIG: Dict[str, Any] = {
         "enabled": True,
         "level": logging.INFO,
         "format": "{asctime} | {levelname:<8} | {name:<20} | {message}",
-        "date_format": "%H:%M:%S"
+        "date_format": "%H:%M:%S",
+        "style": "{"
     },
     
     # File logging format
     "file_format": {
         "format": "[{asctime}] [{levelname:<8}] {name}: {message}",
-        "date_format": "%Y-%m-%d %H:%M:%S"
+        "date_format": "%Y-%m-%d %H:%M:%S",
+        "style": "{"
     }
 }
 

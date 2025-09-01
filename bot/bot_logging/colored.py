@@ -92,18 +92,21 @@ class ColoredFormatter(logging.Formatter):
             return False
         
         # Enable colors if TERM suggests color support
-        term = os.environ.get('TERM', '')
-        if any(color_term in term for color_term in ['color', 'xterm', 'screen', 'tmux']):
+        term = os.environ.get('TERM', '') or ''
+        term_lower = term.lower()
+        if any(t in term_lower for t in ('color', 'xterm', 'screen', 'tmux')):
             return True
-        
+
         # Disable colors on Windows unless explicitly enabled
         if sys.platform == 'win32':
-            # Enable colors if Windows Terminal or ConEmu is detected
-            return any(term in term.lower() 
-                      for term in ['xterm', 'color', 'ansi'])
-        
-        # Enable colors on Unix-like systems by default
-        return True
+            # Enable colors under common Windows terminals that support ANSI.
+            return bool(
+                os.environ.get('WT_SESSION')                  # Windows Terminal
+                or os.environ.get('ANSICON')                  # ANSICON / ConEmu
+                or os.environ.get('ConEmuANSI') == 'ON'       # ConEmu explicit
+                or os.environ.get('TERM_PROGRAM')             # e.g., VSCode integrated terminal
+                or any(t in term_lower for t in ('xterm', 'ansi', 'color'))
+            )        # Enable colors on Unix-like systems by default
     
     def format(self, record: logging.LogRecord) -> str:
         """
